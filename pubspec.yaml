@@ -1,5 +1,5 @@
 name: store_gui_app
-description: "A WhatsApp Status Downloader App."
+description: "A professional, fast WhatsApp Status Downloader App with AdMob integration."
 publish_to: "none"
 version: 1.0.0+1
 
@@ -10,32 +10,38 @@ dependencies:
   flutter:
     sdk: flutter
   cupertino_icons: ^1.0.8
+  
+  # 🟢 Core App Functionality
   permission_handler: ^12.0.1
   gal: ^2.3.1
-  # Added for high-quality video gallery thumbnails
   video_thumbnail: ^0.5.3 
   path_provider: ^2.1.5
-  # 📥 CRUCIAL ADDITIONS FOR ANDROID 11+ FUNCTIONALITY:
+  
+  # 🟢 Android 11+ Google Play Policy Compliance Packages
   saf_stream: ^2.0.0          # Reads binary media streams out of hidden SAF paths
   device_info_plus: ^13.1.0    # Detects the device Android API version at runtime
+  shared_preferences: ^2.3.5   # Saves the user's granted folder access selection locally
+
+  # 🟢 Monetization System
+  google_mobile_ads: ^5.1.0    # Official Google AdMob Engine
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^3.0.2
-  # Added to replace the default Flutter launcher icon
-  flutter_launcher_icons: ^0.13.1 
+  
+  # 🟢 Automation Tools
+  flutter_launcher_icons: ^0.13.1 # Generates custom app icons for all device sizes
 
 flutter:
   uses-material-design: true
 
-  # Defines the directory where you must put your app icon
+  # Asset paths required for app logic and icons
   assets:
     - assets/icon/
 
-# Configuration for generating your custom app icon
+# 🟢 Configuration Engine for Custom Branding Icon Asset Generation
 flutter_launcher_icons:
   android: "launcher_icon"
   image_path: "assets/icon/app_logo.png"
   min_sdk_android: 21
-
