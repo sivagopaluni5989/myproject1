@@ -1,0 +1,5 @@
+Sdk/
+android/Sdk/
+.dart_tool/
+build/
+*.apk
