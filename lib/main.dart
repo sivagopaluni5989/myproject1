@@ -4,8 +4,17 @@ import "package:permission_handler/permission_handler.dart";
 import "package:gal/gal.dart";
 import "package:video_thumbnail/video_thumbnail.dart";
 import "package:path_provider/path_provider.dart";
+import "package:google_mobile_ads/google_mobile_ads.dart";
+import "package:saf_stream/saf_stream.dart";
+import "package:shared_preferences/shared_preferences.dart";
+import "package:device_info_plus/device_info_plus.dart";
 
-void main() => runApp(const MyApp());
+void main() async {
+  // 🟢 Necessary initialization bindings for AdMob and background plugins
+  WidgetsFlutterBinding.ensureInitialized();
+  await MobileAds.instance.initialize();
+  runApp(const MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -31,68 +40,193 @@ class StatusScreen extends StatefulWidget {
 }
 
 class _StatusScreenState extends State<StatusScreen> {
-    
-  List<FileSystemEntity> _statusFiles = [];
+  final _safStream = SafStream();
+  List<SafFileInfo> _statusFiles = [];
   bool _loading = false;
-  final String _whatsappPath = "/storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Media/.Statuses";
+
+  // 🟢 Monetization Ad Systems (Using Official Google Test Unit IDs)
+  BannerAd? _bannerAd;
+  bool _isBannerLoaded = false;
+  InterstitialAd? _interstitialAd;
 
   @override
   void initState() {
     super.initState();
-    _checkPermissions();
+    _loadBannerAd();
+    _loadInterstitialAd();
+    _checkPermissionsAndFetch();
   }
 
-  Future<void> _checkPermissions() async {
+  @override
+  void dispose() {
+    _bannerAd?.dispose();
+    _interstitialAd?.dispose();
+    super.dispose();
+  }
+
+  // 🟢 Loads Baseline Banner Ad
+  void _loadBannerAd() {
+    _bannerAd = BannerAd(
+      adUnitId: 'ca-app-pub-3940256099942544/6300978111', // ⚠️ Replace with your live AdMob Banner ID later
+      request: const AdRequest(),
+      size: AdSize.banner,
+      listener: BannerAdListener(
+        onAdLoaded: (_) => setState(() => _isBannerLoaded = true),
+        onAdFailedToLoad: (ad, error) {
+          ad.dispose();
+          debugPrint("AdMob Banner failed to load: \$error");
+        },
+      ),
+    )..load();
+  }
+
+  // 🟢 Pre-loads Interstitial (Full Screen) Ad in memory
+  void _loadInterstitialAd() {
+    InterstitialAd.load(
+      adUnitId: 'ca-app-pub-3940256099942544/1033173712', // ⚠️ Replace with your live AdMob Interstitial ID later
+      request: const AdRequest(),
+      adLoadCallback: InterstitialAdLoadCallback(
+        onAdLoaded: (ad) => _interstitialAd = ad,
+        onAdFailedToLoad: (error) => debugPrint("AdMob Interstitial failed: \$error"),
+      ),
+    );
+  }
+
+  void _showInterstitialAd() {
+    if (_interstitialAd != null) {
+      _interstitialAd!.show();
+      _loadInterstitialAd(); // Pre-load the next ad instantly for future actions
+    }
+  }
+
+  // 🟢 Google Play Compliant Scoped Storage Engine Handshake
+  Future<void> _checkPermissionsAndFetch() async {
     setState(() => _loading = true);
-    if (Platform.isAndroid) {
+    
+    final deviceInfo = DeviceInfoPlugin();
+    final androidInfo = await deviceInfo.androidInfo;
+    final sdkInt = androidInfo.version.sdkInt;
+
+    if (sdkInt >= 30) {
+      // Android 11+ require Google Scoped Storage Framework (SAF) compliance
+      final prefs = await SharedPreferences.getInstance();
+      final savedUri = prefs.getString('whatsapp_saf_uri');
+
+      if (savedUri != null && await _safStream.isRootUriValid(savedUri)) {
+        _fetchStatusesUsingSAF(savedUri);
+      } else {
+        _requestSAFDirectory();
+      }
+    } else {
+      // Legacy Permission fallback for Android 10 and older devices
       Map<Permission, PermissionStatus> statuses = await [
         Permission.storage,
-        Permission.manageExternalStorage,
       ].request();
-      
-      if (statuses[Permission.manageExternalStorage] == PermissionStatus.granted || 
-          statuses[Permission.storage] == PermissionStatus.granted) {
-        _fetchStatuses();
+
+      if (statuses[Permission.storage] == PermissionStatus.granted) {
+        _fetchLegacyStatuses();
       } else {
-        _showSnackBar("Storage permissions are required to access statuses.");
+        _showSnackBar("Storage permission is required to access media files.");
         setState(() => _loading = false);
       }
     }
   }
 
-  Future<void> _fetchStatuses() async {
-    setState(() => _loading = true);
+  // Opens Native OS Storage Framework panel explicitly targeting the WhatsApp folder
+  Future<void> _requestSAFDirectory() async {
     try {
-      final dir = Directory(_whatsappPath);
-      if (await dir.exists()) {
-        final List<FileSystemEntity> files = dir.listSync();
-        setState(() {
-          _statusFiles = files.where((file) {
-            final path = file.path.toLowerCase();
-            return path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".mp4");
-          }).toList();
-        });
+      const targetPath = "content://com.android.externalstorage.documents/tree/primary%3AAndroid%2Fmedia/document/primary%3AAndroid%2Fmedia%2Fcom.whatsapp%2FWhatsApp%2FMedia%2F.Statuses";
+      String? selectedTreeUri = await _safStream.openDirectoryTree(initialUri: targetPath);
+
+      if (selectedTreeUri != null) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('whatsapp_saf_uri', selectedTreeUri);
+        _fetchStatusesUsingSAF(selectedTreeUri);
       } else {
-        _showSnackBar("WhatsApp status folder not found on device.");
+        _showSnackBar("You must grant access to the folder to fetch media.");
+        setState(() => _loading = false);
       }
     } catch (e) {
-      _showSnackBar("Failed to load files: $e");
+      _showSnackBar("Directory tracking handshake failed: \$e");
+      setState(() => _loading = false);
+    }
+  }
+
+  // Safely index files via content streams for modern devices
+  Future<void> _fetchStatusesUsingSAF(String rootUri) async {
+    try {
+      final List<SafFileInfo> files = await _safStream.listDirectory(rootUri);
+      setState(() {
+        _statusFiles = files.where((file) {
+          if (file.isDirectory) return false;
+          final name = file.name.toLowerCase();
+          return name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".mp4");
+        }).toList();
+      });
+    } catch (e) {
+      _showSnackBar("Failed to read items: \$e");
     } finally {
       setState(() => _loading = false);
     }
   }
 
-  Future<void> _saveToGallery(String path) async {
+  // Fallback engine tracker for older phone models
+  Future<void> _fetchLegacyStatuses() async {
+    try {
+      const legacyPath = "/storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Media/.Statuses";
+      final dir = Directory(legacyPath);
+      if (await dir.exists()) {
+        final List<FileSystemEntity> systemFiles = dir.listSync();
+        setState(() {
+          _statusFiles = systemFiles.map((f) => SafFileInfo(
+            name: f.path.split('/').last,
+            path: f.path,
+            uri: Uri.file(f.path).toString(),
+            isDirectory: false,
+            lastModified: 0,
+            size: 0,
+          )).where((file) {
+            final name = file.name.toLowerCase();
+            return name.endsWith(".jpg") || name.endsWith(".jpeg") || name.endsWith(".mp4");
+          }).toList();
+        });
+      } else {
+        _showSnackBar("WhatsApp installation structure not found.");
+      }
+    } catch (e) {
+      _showSnackBar("Legacy reader failed: \$e");
+    } finally {
+      setState(() => _loading = false);
+    }
+  }
+
+  // 🟢 Downloader processing module featuring ad trigger on completion
+  Future<void> _saveToGallery(SafFileInfo file) async {
     try {
       _showSnackBar("Saving item...");
-      if (path.toLowerCase().endsWith(".mp4")) {
-        await Gal.putVideo(path);
+      
+      // Cache binary stream data into system directories safely before moving to Photo Gallery
+      final tempDir = await getTemporaryDirectory();
+      final tempFile = File('\({tempDir.path}/\){file.name}');
+      
+      if (file.path.isNotEmpty && await File(file.path).exists()) {
+        await File(file.path).copy(tempFile.path);
       } else {
-        await Gal.putImage(path);
+        final fileBytes = await _safStream.readFileBytes(file.uri);
+        await tempFile.writeAsBytes(fileBytes);
       }
+
+      if (file.name.toLowerCase().endsWith(".mp4")) {
+        await Gal.putVideo(tempFile.path);
+      } else {
+        await Gal.putImage(tempFile.path);
+      }
+      
       _showSnackBar("Saved to Gallery! 🎉");
+      _showInterstitialAd(); // 🟢 Trigger Full Screen Ad on successful save
+      
     } catch (e) {
-      _showSnackBar("Download error: $e");
+      _showSnackBar("Download failed: \$e");
     }
   }
 
@@ -103,11 +237,26 @@ class _StatusScreenState extends State<StatusScreen> {
     );
   }
 
-  Future<String?> _getVideoThumbnail(String videoPath) async {
+  Future<String?> _getVideoThumbnail(SafFileInfo file) async {
     try {
       final tempDir = await getTemporaryDirectory();
+      final tempFile = File('\({tempDir.path}/thumb_\){file.name}');
+      
+      if (file.path.isNotEmpty) {
+        return await VideoThumbnail.thumbnailFile(
+          video: file.path,
+          thumbnailPath: tempDir.path,
+          imageFormat: ImageFormat.JPEG,
+          maxHeight: 350,
+          quality: 80,
+        );
+      }
+
+      final fileBytes = await _safStream.readFileBytes(file.uri);
+      await tempFile.writeAsBytes(fileBytes);
+
       return await VideoThumbnail.thumbnailFile(
-        video: videoPath,
+        video: tempFile.path,
         thumbnailPath: tempDir.path,
         imageFormat: ImageFormat.JPEG,
         maxHeight: 350,
@@ -127,106 +276,22 @@ class _StatusScreenState extends State<StatusScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh, color: Colors.white),
-            tooltip: "Refresh",
-            onPressed: _fetchStatuses,
+            tooltip: "Refresh List",
+            onPressed: _checkPermissionsAndFetch,
           )
         ],
       ),
-      body: _loading
-          ? const Center(child: CircularProgressIndicator(color: Colors.green))
-          : _statusFiles.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("No statuses found.", style: TextStyle(fontSize: 16)),
-                      const SizedBox(height: 12),
-                      ElevatedButton.icon(
-                        onPressed: _checkPermissions,
-                        icon: const Icon(Icons.security),
-                        label: const Text("Retry Permissions Check"),
-                        style: ElevatedButton.styleFrom(backgroundColor: Colors.green, foregroundColor: Colors.white),
-                      ),
-                    ],
-                  ),
-                )
-              : GridView.builder(
-                  padding: const EdgeInsets.all(8),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2, 
-                    crossAxisSpacing: 8, 
-                    mainAxisSpacing: 8,
-                    childAspectRatio: 0.85,
-                  ),
-                  itemCount: _statusFiles.length,
-                  itemBuilder: (context, i) {
-                    final file = _statusFiles[i];
-                    final name = file.path.split("/").last;
-                    final isVideo = name.toLowerCase().endsWith(".mp4");
-                    
-                    return Card(
-                      clipBehavior: Clip.antiAlias,
-                      elevation: 3,
-                      child: Stack(
-                        fit: StackFit.expand,
-                        children: [
-                          isVideo
-                              ? FutureBuilder<String?>(
-                                  future: _getVideoThumbnail(file.path),
-                                  builder: (context, snapshot) {
-                                    if (snapshot.connectionState == ConnectionState.done && snapshot.hasData && snapshot.data != null) {
-                                      return Stack(
-                                        fit: StackFit.expand,
-                                        children: [
-                                          Image.file(File(snapshot.data!), fit: BoxFit.cover),
-                                          const Center(
-                                            child: Icon(Icons.play_circle_filled, size: 50, color: Colors.white70),
-                                          ),
-                                        ],
-                                      );
-                                    }
-                                    return const Center(child: CircularProgressIndicator(color: Colors.green, strokeWidth: 2));
-                                  },
-                                )
-                              : Image.file(
-                                  File(file.path),
-                                  fit: BoxFit.cover,
-                                  cacheWidth: 350,
-                                  cacheHeight: 350,
-                                ),
-                          Positioned(
-                            bottom: 0, 
-                            left: 0, 
-                            right: 0, 
-                            child: Container(
-                              color: Colors.black.withOpacity(0.60), 
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween, 
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      name, 
-                                      style: const TextStyle(color: Colors.white, fontSize: 11), 
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    constraints: const BoxConstraints(),
-                                    padding: EdgeInsets.zero,
-                                    icon: const Icon(Icons.download, color: Colors.greenAccent, size: 26), 
-                                    onPressed: () => _saveToGallery(file.path),
-                                  )
-                                ],
-                              ),
-                            ),
-                          )
-                        ],
-                      ),
-                    );
-                  },
-                ),
-    );
-  }
-}
+      body: Column(
+        children: [
+          Expanded(
+            child: _loading
+                ? const Center(child: CircularProgressIndicator(color: Colors.green))
+                : _statusFiles.isEmpty
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            const Text("No statuses found.", style: TextStyle(fontSize: 16)),
+                            const SizedBox(height: 12),
+                            ElevatedButton.icon(
+                              onPressed: _checkPermissionsAndFetch,
