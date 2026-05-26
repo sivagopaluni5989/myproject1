@@ -62,7 +62,7 @@ class _StatusScreenState extends State<StatusScreen> {
       size: AdSize.banner,
 
       // Replace with your real AdMob Banner ID
-      adUnitId: BannerAd.testAdUnitId,
+      adUnitId: "ca-app-pub-3940256099942544/6300978111",
 
       listener: BannerAdListener(
         onAdLoaded: (ad) {
