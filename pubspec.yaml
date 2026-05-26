@@ -9,14 +9,33 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  cupertino_icons: ^1.0.6
-  permission_handler: ^11.3.1
+  cupertino_icons: ^1.0.8
+  permission_handler: ^12.0.1
   gal: ^2.3.1
+  # Added for high-quality video gallery thumbnails
+  video_thumbnail: ^0.5.3 
+  path_provider: ^2.1.5
+  # 📥 CRUCIAL ADDITIONS FOR ANDROID 11+ FUNCTIONALITY:
+  saf_stream: ^2.0.0          # Reads binary media streams out of hidden SAF paths
+  device_info_plus: ^13.1.0    # Detects the device Android API version at runtime
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^3.0.0
+  flutter_lints: ^3.0.2
+  # Added to replace the default Flutter launcher icon
+  flutter_launcher_icons: ^0.13.1 
 
 flutter:
   uses-material-design: true
+
+  # Defines the directory where you must put your app icon
+  assets:
+    - assets/icon/
+
+# Configuration for generating your custom app icon
+flutter_launcher_icons:
+  android: "launcher_icon"
+  image_path: "assets/icon/app_logo.png"
+  min_sdk_android: 21
+

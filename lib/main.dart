@@ -1,8 +1,9 @@
 import "dart:io";
 import "package:flutter/material.dart";
-import "package:flutter/services.dart";
 import "package:permission_handler/permission_handler.dart";
 import "package:gal/gal.dart";
+import "package:video_thumbnail/video_thumbnail.dart";
+import "package:path_provider/path_provider.dart";
 
 void main() => runApp(const MyApp());
 
@@ -12,6 +13,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: "Status Downloader",
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         primarySwatch: Colors.green,
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.green),
@@ -29,9 +31,7 @@ class StatusScreen extends StatefulWidget {
 }
 
 class _StatusScreenState extends State<StatusScreen> {
-  // Use a secure internal channel to read protected storage directory spaces
-  static const PlatformMethodChannel = MethodChannel("com.example.status_downloader/storage");
-  
+    
   List<FileSystemEntity> _statusFiles = [];
   bool _loading = false;
   final String _whatsappPath = "/storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Media/.Statuses";
@@ -45,7 +45,6 @@ class _StatusScreenState extends State<StatusScreen> {
   Future<void> _checkPermissions() async {
     setState(() => _loading = true);
     if (Platform.isAndroid) {
-      // ManageExternalStorage handles directory reading rights safely on Android 11+
       Map<Permission, PermissionStatus> statuses = await [
         Permission.storage,
         Permission.manageExternalStorage,
@@ -104,6 +103,21 @@ class _StatusScreenState extends State<StatusScreen> {
     );
   }
 
+  Future<String?> _getVideoThumbnail(String videoPath) async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      return await VideoThumbnail.thumbnailFile(
+        video: videoPath,
+        thumbnailPath: tempDir.path,
+        imageFormat: ImageFormat.JPEG,
+        maxHeight: 350,
+        quality: 80,
+      );
+    } catch (e) {
+      return null;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -156,14 +170,30 @@ class _StatusScreenState extends State<StatusScreen> {
                       child: Stack(
                         fit: StackFit.expand,
                         children: [
-                          Container(
-                            color: Colors.black12,
-                            child: Icon(
-                              isVideo ? Icons.play_circle_filled : Icons.image, 
-                              size: 60, 
-                              color: isVideo ? Colors.redAccent : Colors.green,
-                            ),
-                          ),
+                          isVideo
+                              ? FutureBuilder<String?>(
+                                  future: _getVideoThumbnail(file.path),
+                                  builder: (context, snapshot) {
+                                    if (snapshot.connectionState == ConnectionState.done && snapshot.hasData && snapshot.data != null) {
+                                      return Stack(
+                                        fit: StackFit.expand,
+                                        children: [
+                                          Image.file(File(snapshot.data!), fit: BoxFit.cover),
+                                          const Center(
+                                            child: Icon(Icons.play_circle_filled, size: 50, color: Colors.white70),
+                                          ),
+                                        ],
+                                      );
+                                    }
+                                    return const Center(child: CircularProgressIndicator(color: Colors.green, strokeWidth: 2));
+                                  },
+                                )
+                              : Image.file(
+                                  File(file.path),
+                                  fit: BoxFit.cover,
+                                  cacheWidth: 350,
+                                  cacheHeight: 350,
+                                ),
                           Positioned(
                             bottom: 0, 
                             left: 0, 
