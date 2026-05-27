@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:saf/saf.dart'; 
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -17,7 +18,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Whatsapp Status Fast Downloader',
+      title: 'WhatsApp Status Saver',
       theme: ThemeData(
         primarySwatch: Colors.green,
       ),
@@ -34,7 +35,7 @@ class StatusScreen extends StatefulWidget {
 }
 
 class _StatusScreenState extends State<StatusScreen> {
-  List<FileSystemEntity> statusFiles = [];
+  List<String> statusFiles = [];
   bool isLoading = true;
   BannerAd? bannerAd;
   bool adLoaded = false;
@@ -81,22 +82,21 @@ class _StatusScreenState extends State<StatusScreen> {
       "/storage/emulated/0/WhatsApp/Media/.Statuses"
     ];
 
-    List<FileSystemEntity> temp = [];
+    List<String> temp = [];
 
     for (String path in paths) {
       Directory dir = Directory(path);
       if (await dir.exists()) {
         try {
-          temp.addAll(
-            dir.listSync().where((file) =>
-                !file.path.contains(".nomedia") &&
-                (file.path.endsWith(".jpg") ||
-                    file.path.endsWith(".jpeg") ||
-                    file.path.endsWith(".png") ||
-                    file.path.endsWith(".mp4"))),
-          );
+          final files = dir.listSync().map((f) => f.path).where((filePath) =>
+              !filePath.contains(".nomedia") &&
+              (filePath.endsWith(".jpg") ||
+                  filePath.endsWith(".jpeg") ||
+                  filePath.endsWith(".png") ||
+                  filePath.endsWith(".mp4")));
+          temp.addAll(files);
         } catch (e) {
-          debugPrint("Directory access blocked by OS Scoped Storage. Requesting manual picker fallback.");
+          debugPrint("Scoped Storage Blocked Direct Path Access.");
         }
       }
     }
@@ -110,32 +110,50 @@ class _StatusScreenState extends State<StatusScreen> {
   Future<void> pickCustomDirectory() async {
     String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
     if (selectedDirectory != null) {
-      Directory dir = Directory(selectedDirectory);
+      setState(() {
+        isLoading = true;
+      });
       try {
-        List<FileSystemEntity> files = dir.listSync().where((file) =>
-            file.path.endsWith(".jpg") ||
-            file.path.endsWith(".jpeg") ||
-            file.path.endsWith(".png") ||
-            file.path.endsWith(".mp4")).toList();
-        setState(() {
-          statusFiles = files;
-        });
+        // Initialize SAF properly for 1.0.4 using a static approach or instance configuration
+        Saf saf = Saf(selectedDirectory);
+        
+        // Synchronize and register the path internally
+        await saf.syncWithStorage();
+        List<String>? cachedPaths = await saf.getCachedFilesPaths();
+        
+        if (cachedPaths != null) {
+          List<String> filteredFiles = cachedPaths.where((filePath) =>
+              filePath.toLowerCase().endsWith(".jpg") ||
+              filePath.toLowerCase().endsWith(".jpeg") ||
+              filePath.toLowerCase().endsWith(".png") ||
+              filePath.toLowerCase().endsWith(".mp4")).toList();
+          
+          setState(() {
+            statusFiles = filteredFiles;
+          });
+        }
       } catch (e) {
-        debugPrint("Error loading picked folder: $e");
+        debugPrint("SAF Reading Error: $e");
+      } finally {
+        setState(() {
+          isLoading = false;
+        });
       }
     }
   }
 
-  Future<void> saveStatus(File file) async {
+  Future<void> saveStatus(String filePath) async {
     try {
       Directory saveDir = Directory("/storage/emulated/0/Download/SavedStatuses");
       if (!await saveDir.exists()) {
         await saveDir.create(recursive: true);
       }
 
-      String filename = file.uri.pathSegments.last;
+      String filename = filePath.split('/').last;
       File newFile = File("${saveDir.path}/$filename");
-      await newFile.writeAsBytes(await file.readAsBytes());
+      
+      File sourceFile = File(filePath);
+      await newFile.writeAsBytes(await sourceFile.readAsBytes());
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -145,24 +163,24 @@ class _StatusScreenState extends State<StatusScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error saving status: $e"), backgroundColor: Colors.red),
+          SnackBar(content: Text("Error saving: $e"), backgroundColor: Colors.red),
         );
       }
     }
   }
 
-  Widget statusItem(FileSystemEntity file) {
-    bool isVideo = file.path.endsWith(".mp4");
+  Widget statusItem(String filePath) {
+    bool isVideo = filePath.toLowerCase().endsWith(".mp4");
     return Card(
       child: Column(
         children: [
           Expanded(
             child: isVideo
                 ? const Center(child: Icon(Icons.video_library, size: 80, color: Colors.green))
-                : Image.file(File(file.path), fit: BoxFit.cover, width: double.infinity),
+                : Image.file(File(filePath), fit: BoxFit.cover, width: double.infinity),
           ),
           ElevatedButton.icon(
-            onPressed: () => saveStatus(File(file.path)),
+            onPressed: () => saveStatus(filePath),
             icon: const Icon(Icons.download),
             label: const Text("Save"),
           )
@@ -181,14 +199,11 @@ class _StatusScreenState extends State<StatusScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Whatsapp Status Fast Downloader"),
-        backgroundColor: Colors.green,
+        title: const Text("WhatsApp Status Saver"),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        elevation: 0,
         actions: [
-          IconButton(
-            onPressed: pickCustomDirectory,
-            icon: const Icon(Icons.folder_open),
-            tooltip: "Choose Manual Folder Path",
-          ),
           IconButton(
             onPressed: getStatuses,
             icon: const Icon(Icons.refresh),
@@ -202,12 +217,22 @@ class _StatusScreenState extends State<StatusScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Text("No statuses found directly.", style: TextStyle(fontSize: 16)),
-                      const SizedBox(height: 12),
+                      const Text(
+                        "No statuses found",
+                        style: TextStyle(fontSize: 18, color: Colors.black54),
+                      ),
+                      const SizedBox(height: 20),
                       ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        ),
                         onPressed: pickCustomDirectory,
-                        icon: const Icon(Icons.folder),
-                        label: const Text("Manually Select .Statuses Folder"),
+                        icon: const Icon(Icons.folder_open, color: Colors.white),
+                        label: const Text(
+                          "Grant WhatsApp Folder Permission",
+                          style: TextStyle(color: Colors.white, fontSize: 16),
+                        ),
                       ),
                     ],
                   ),
