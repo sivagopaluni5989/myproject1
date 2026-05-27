@@ -1,0 +1,28 @@
+name: store_gui_app
+description: "WhatsApp Status Downloader with AdMob"
+publish_to: "none"
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.0.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  cupertino_icons: ^1.0.8
+
+  # Core
+  permission_handler: ^12.0.1
+  path_provider: ^2.1.5
+
+  # Monetization
+  google_mobile_ads: ^5.3.1
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.2
+
+flutter:
+  uses-material-design: true
