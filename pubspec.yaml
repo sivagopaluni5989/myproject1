@@ -25,6 +25,7 @@ dependencies:
 
   # Real-time Video Thumbnail Renderer (Corrected Version)
   video_thumbnail_plus: ^0.0.2
+  gal: ^2.3.1  
 
 dev_dependencies:
   flutter_test:
