@@ -45,8 +45,6 @@ class _StatusScreenState extends State<StatusScreen> {
 
   bool isBannerLoaded = false;
 
-  final String statusPath =
-      "/storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Media/.Statuses";
 
   @override
   void initState() {
@@ -82,24 +80,39 @@ class _StatusScreenState extends State<StatusScreen> {
   }
 
   Future<void> loadStatuses() async {
-    await Permission.storage.request();
-    await Permission.manageExternalStorage.request();
+  await Permission.storage.request();
+  await Permission.manageExternalStorage.request();
 
-    final dir = Directory(statusPath);
+  List<String> paths = [
+    "/storage/emulated/0/Android/media/com.whatsapp/WhatsApp/Media/.Statuses",
+    "/storage/emulated/0/Android/media/com.whatsapp.w4b/WhatsApp Business/Media/.Statuses",
+    "/storage/emulated/0/WhatsApp/Media/.Statuses",
+  ];
+
+  List<FileSystemEntity> files = [];
+
+  for (String path in paths) {
+    Directory dir = Directory(path);
 
     if (await dir.exists()) {
-      statusFiles = dir.listSync().where((file) {
-        return file.path.endsWith(".jpg") ||
-            file.path.endsWith(".jpeg") ||
-            file.path.endsWith(".png") ||
-            file.path.endsWith(".mp4");
-      }).toList();
+      files.addAll(
+  dir.listSync().where(
+    (file) =>
+        !file.path.contains(".nomedia") &&
+        (file.path.toLowerCase().endsWith(".jpg") ||
+         file.path.toLowerCase().endsWith(".jpeg") ||
+         file.path.toLowerCase().endsWith(".png") ||
+         file.path.toLowerCase().endsWith(".mp4")),
+  ),
+);
     }
-
-    setState(() {
-      isLoading = false;
-    });
   }
+
+  setState(() {
+    statusFiles = files;
+    isLoading = false;
+  });
+}
 
   Future<void> saveFile(File file) async {
     final extDir = await getExternalStorageDirectory();
