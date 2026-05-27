@@ -2,8 +2,8 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:saf/saf.dart'; 
+import 'package:video_thumbnail_plus/video_thumbnail_plus.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,9 +19,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'WhatsApp Status Saver',
-      theme: ThemeData(
-        primarySwatch: Colors.green,
-      ),
+      theme: ThemeData(primarySwatch: Colors.green),
       home: const StatusScreen(),
     );
   }
@@ -35,7 +33,8 @@ class StatusScreen extends StatefulWidget {
 }
 
 class _StatusScreenState extends State<StatusScreen> {
-  List<String> statusFiles = [];
+  List<FileSystemEntity> statusFiles = [];
+  Map<String, String> videoThumbnails = {}; 
   bool isLoading = true;
   BannerAd? bannerAd;
   bool adLoaded = false;
@@ -44,7 +43,7 @@ class _StatusScreenState extends State<StatusScreen> {
   void initState() {
     super.initState();
     loadBanner();
-    getStatuses();
+    autoRequestAndLoad();
   }
 
   void loadBanner() {
@@ -52,24 +51,16 @@ class _StatusScreenState extends State<StatusScreen> {
       size: AdSize.banner,
       adUnitId: "ca-app-pub-3940256099942544/6300978111", 
       listener: BannerAdListener(
-        onAdLoaded: (_) {
-          setState(() {
-            adLoaded = true;
-          });
-        },
-        onAdFailedToLoad: (ad, error) {
-          ad.dispose();
-        },
+        onAdLoaded: (_) => setState(() => adLoaded = true),
+        onAdFailedToLoad: (ad, error) => ad.dispose(),
       ),
       request: const AdRequest(),
     );
     bannerAd!.load();
   }
 
-  Future<void> getStatuses() async {
-    setState(() {
-      isLoading = true;
-    });
+  Future<void> autoRequestAndLoad() async {
+    setState(() => isLoading = true);
 
     if (Platform.isAndroid) {
       await Permission.storage.request();
@@ -82,21 +73,22 @@ class _StatusScreenState extends State<StatusScreen> {
       "/storage/emulated/0/WhatsApp/Media/.Statuses"
     ];
 
-    List<String> temp = [];
+    List<FileSystemEntity> temp = [];
 
     for (String path in paths) {
       Directory dir = Directory(path);
       if (await dir.exists()) {
         try {
-          final files = dir.listSync().map((f) => f.path).where((filePath) =>
-              !filePath.contains(".nomedia") &&
-              (filePath.endsWith(".jpg") ||
-                  filePath.endsWith(".jpeg") ||
-                  filePath.endsWith(".png") ||
-                  filePath.endsWith(".mp4")));
-          temp.addAll(files);
+          temp.addAll(
+            dir.listSync().where((file) =>
+                !file.path.contains(".nomedia") &&
+                (file.path.endsWith(".jpg") ||
+                    file.path.endsWith(".jpeg") ||
+                    file.path.endsWith(".png") ||
+                    file.path.endsWith(".mp4"))),
+          );
         } catch (e) {
-          debugPrint("Scoped Storage Blocked Direct Path Access.");
+          debugPrint("Folder reading blocked: $e");
         }
       }
     }
@@ -105,62 +97,45 @@ class _StatusScreenState extends State<StatusScreen> {
       statusFiles = temp;
       isLoading = false;
     });
+
+    generateAllThumbnails();
   }
 
-  Future<void> pickCustomDirectory() async {
-    String? selectedDirectory = await FilePicker.platform.getDirectoryPath();
-    if (selectedDirectory != null) {
-      setState(() {
-        isLoading = true;
-      });
-      try {
-        // Initialize SAF properly for 1.0.4 API semantics
-        Saf saf = Saf(selectedDirectory);
-        
-        // request permission with the correct method name mapping
-        bool? isGranted = await saf.getDirectoryPermission(isDynamic: true);
-        
-        if (isGranted == true) {
-          // Sync files cache natively
-          await saf.sync();
-          
-          // Fetch strings path mapping matching version 1.0.4
-          List<String>? cachedPaths = await saf.getCachedFilesPath();
-          
-          if (cachedPaths != null) {
-            List<String> filteredFiles = cachedPaths.where((filePath) =>
-                filePath.toLowerCase().endsWith(".jpg") ||
-                filePath.toLowerCase().endsWith(".jpeg") ||
-                filePath.toLowerCase().endsWith(".png") ||
-                filePath.toLowerCase().endsWith(".mp4")).toList();
-            
+  Future<void> generateAllThumbnails() async {
+    try {
+      final tempDir = await getTemporaryDirectory();
+      for (var file in statusFiles) {
+        if (file.path.endsWith(".mp4")) {
+          // Changed VideoThumbnail to VideoThumbnailPlus to match package ^0.0.2
+          final thumbnailPath = await VideoThumbnailPlus.thumbnailFile(
+            video: file.path,
+            thumbnailPath: tempDir.path,
+            imageFormat: ImageFormat.JPEG,
+            maxWidth: 300, 
+            quality: 75,
+          );
+          if (thumbnailPath != null && mounted) {
             setState(() {
-              statusFiles = filteredFiles;
+              videoThumbnails[file.path] = thumbnailPath;
             });
           }
         }
-      } catch (e) {
-        debugPrint("SAF Reading Error: $e");
-      } finally {
-        setState(() {
-          isLoading = false;
-        });
       }
+    } catch (e) {
+      debugPrint("Error creating video frame: $e");
     }
   }
 
-  Future<void> saveStatus(String filePath) async {
+  Future<void> saveStatus(File file) async {
     try {
       Directory saveDir = Directory("/storage/emulated/0/Download/SavedStatuses");
       if (!await saveDir.exists()) {
         await saveDir.create(recursive: true);
       }
 
-      String filename = filePath.split('/').last;
+      String filename = file.uri.pathSegments.last;
       File newFile = File("${saveDir.path}/$filename");
-      
-      File sourceFile = File(filePath);
-      await newFile.writeAsBytes(await sourceFile.readAsBytes());
+      await newFile.writeAsBytes(await file.readAsBytes());
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -170,49 +145,29 @@ class _StatusScreenState extends State<StatusScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Error saving: $e"), backgroundColor: Colors.red),
+          SnackBar(content: Text("Save Error: $e"), backgroundColor: Colors.red),
         );
       }
     }
-  }
-
-  Widget statusItem(String filePath) {
-    bool isVideo = filePath.toLowerCase().endsWith(".mp4");
-    return Card(
-      child: Column(
-        children: [
-          Expanded(
-            child: isVideo
-                ? const Center(child: Icon(Icons.video_library, size: 80, color: Colors.green))
-                : Image.file(File(filePath), fit: BoxFit.cover, width: double.infinity),
-          ),
-          ElevatedButton.icon(
-            onPressed: () => saveStatus(filePath),
-            icon: const Icon(Icons.download),
-            label: const Text("Save"),
-          )
-        ],
-      ),
-    );
-  }
-
-  @override
-  void dispose() {
-    bannerAd?.dispose();
-    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("WhatsApp Status Saver"),
-        backgroundColor: Colors.white,
-        foregroundColor: Colors.black,
-        elevation: 0,
+        centerTitle: true, // Perfect center layout alignment
+        title: const Text(
+          "WhatsApp Status Saver",
+          style: TextStyle(
+            fontWeight: FontWeight.bold, // Bold and stylish typography
+            fontSize: 22,
+            letterSpacing: 0.8,
+          ),
+        ),
+        backgroundColor: Colors.green,
         actions: [
           IconButton(
-            onPressed: getStatuses,
+            onPressed: autoRequestAndLoad,
             icon: const Icon(Icons.refresh),
           )
         ],
@@ -220,28 +175,14 @@ class _StatusScreenState extends State<StatusScreen> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : statusFiles.isEmpty
-              ? Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text(
-                        "No statuses found",
-                        style: TextStyle(fontSize: 18, color: Colors.black54),
-                      ),
-                      const SizedBox(height: 20),
-                      ElevatedButton.icon(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.green,
-                          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                        ),
-                        onPressed: pickCustomDirectory,
-                        icon: const Icon(Icons.folder_open, color: Colors.white),
-                        label: const Text(
-                          "Grant WhatsApp Folder Permission",
-                          style: TextStyle(color: Colors.white, fontSize: 16),
-                        ),
-                      ),
-                    ],
+              ? const Center(
+                  child: Padding(
+                    padding: EdgeInsets.all(24.0),
+                    child: Text(
+                      "No statuses found.\n\nMake sure to watch statuses inside the official WhatsApp application first!",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(fontSize: 16, color: Colors.black54),
+                    ),
                   ),
                 )
               : GridView.builder(
@@ -254,7 +195,59 @@ class _StatusScreenState extends State<StatusScreen> {
                     childAspectRatio: 0.7,
                   ),
                   itemBuilder: (context, index) {
-                    return statusItem(statusFiles[index]);
+                    final file = statusFiles[index];
+                    bool isVideo = file.path.endsWith(".mp4");
+                    String? videoThumb = videoThumbnails[file.path];
+
+                    return Card(
+                      clipBehavior: Clip.antiAlias,
+                      child: Column(
+                        children: [
+                          Expanded(
+                            child: isVideo
+                                ? (videoThumb != null
+                                    ? Stack(
+                                        alignment: Alignment.center,
+                                        children: [
+                                          Image.file(
+                                            File(videoThumb), 
+                                            fit: BoxFit.cover, 
+                                            width: double.infinity, 
+                                            height: double.infinity
+                                          ),
+                                          Container(
+                                            padding: const EdgeInsets.all(8),
+                                            decoration: const BoxDecoration(
+                                              color: Colors.black45, 
+                                              shape: BoxShape.circle
+                                            ),
+                                            child: const Icon(
+                                              Icons.play_arrow, 
+                                              size: 36, 
+                                              color: Colors.white
+                                            ),
+                                          )
+                                        ],
+                                      )
+                                    : const Center(child: CircularProgressIndicator()))
+                                : Image.file(
+                                    File(file.path), 
+                                    fit: BoxFit.cover, 
+                                    width: double.infinity, 
+                                    height: double.infinity
+                                  ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 4.0),
+                            child: ElevatedButton.icon(
+                              onPressed: () => saveStatus(File(file.path)),
+                              icon: const Icon(Icons.download),
+                              label: const Text("Save"),
+                            ),
+                          )
+                        ],
+                      ),
+                    );
                   },
                 ),
       bottomNavigationBar: adLoaded
