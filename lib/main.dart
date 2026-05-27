@@ -114,23 +114,30 @@ class _StatusScreenState extends State<StatusScreen> {
         isLoading = true;
       });
       try {
-        // Initialize SAF properly for 1.0.4 using a static approach or instance configuration
+        // Initialize SAF properly for 1.0.4 API semantics
         Saf saf = Saf(selectedDirectory);
         
-        // Synchronize and register the path internally
-        await saf.syncWithStorage();
-        List<String>? cachedPaths = await saf.getCachedFilesPaths();
+        // request permission with the correct method name mapping
+        bool? isGranted = await saf.getDirectoryPermission(isDynamic: true);
         
-        if (cachedPaths != null) {
-          List<String> filteredFiles = cachedPaths.where((filePath) =>
-              filePath.toLowerCase().endsWith(".jpg") ||
-              filePath.toLowerCase().endsWith(".jpeg") ||
-              filePath.toLowerCase().endsWith(".png") ||
-              filePath.toLowerCase().endsWith(".mp4")).toList();
+        if (isGranted == true) {
+          // Sync files cache natively
+          await saf.sync();
           
-          setState(() {
-            statusFiles = filteredFiles;
-          });
+          // Fetch strings path mapping matching version 1.0.4
+          List<String>? cachedPaths = await saf.getCachedFilesPath();
+          
+          if (cachedPaths != null) {
+            List<String> filteredFiles = cachedPaths.where((filePath) =>
+                filePath.toLowerCase().endsWith(".jpg") ||
+                filePath.toLowerCase().endsWith(".jpeg") ||
+                filePath.toLowerCase().endsWith(".png") ||
+                filePath.toLowerCase().endsWith(".mp4")).toList();
+            
+            setState(() {
+              statusFiles = filteredFiles;
+            });
+          }
         }
       } catch (e) {
         debugPrint("SAF Reading Error: $e");
