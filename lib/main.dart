@@ -5,6 +5,7 @@ import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:saf/saf.dart';
+import 'package:video_player/video_player.dart';
 import 'package:video_thumbnail_plus/video_thumbnail_plus.dart';
 import 'package:gallery_saver_plus/gallery_saver.dart';
 
@@ -24,7 +25,9 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'WhatsApp Status Saver',
-      theme: ThemeData(primarySwatch: Colors.green),
+      theme: ThemeData(
+        primarySwatch: Colors.green,
+      ),
       home: const StatusScreen(),
     );
   }
@@ -181,63 +184,65 @@ class _StatusScreenState extends State<StatusScreen>
   }
 
   Future<void> saveStatus(String filePath) async {
-  try {
-    final file = File(filePath);
+    try {
+      final file = File(filePath);
 
-    if (!await file.exists()) {
-      throw Exception('File not found');
-    }
+      if (!await file.exists()) {
+        throw Exception('File not found');
+      }
 
-    Directory targetDir;
+      Directory targetDir;
 
-    if (filePath.endsWith('.mp4')) {
-      targetDir = Directory(
-        '/storage/emulated/0/Movies/StatusSaver',
-      );
-    } else {
-      targetDir = Directory(
-        '/storage/emulated/0/Pictures/StatusSaver',
-      );
-    }
+      if (filePath.endsWith('.mp4')) {
+        targetDir = Directory(
+          '/storage/emulated/0/Movies/StatusSaver',
+        );
+      } else {
+        targetDir = Directory(
+          '/storage/emulated/0/Pictures/StatusSaver',
+        );
+      }
 
-    if (!await targetDir.exists()) {
-      await targetDir.create(recursive: true);
-    }
+      if (!await targetDir.exists()) {
+        await targetDir.create(recursive: true);
+      }
 
-    final fileName =
-        DateTime.now().millisecondsSinceEpoch.toString() +
-            (filePath.endsWith('.mp4') ? '.mp4' : '.jpg');
+      final fileName =
+          DateTime.now().millisecondsSinceEpoch.toString() +
+              (filePath.endsWith('.mp4')
+                  ? '.mp4'
+                  : '.jpg');
 
-    final savedPath = '${targetDir.path}/$fileName';
+      final savedPath = '${targetDir.path}/$fileName';
 
-    final savedFile = await file.copy(savedPath);
+      final savedFile = await file.copy(savedPath);
 
-    // AUTO REFRESH GALLERY
-    if (filePath.endsWith('.mp4')) {
-      await GallerySaver.saveVideo(savedFile.path);
-    } else {
-      await GallerySaver.saveImage(savedFile.path);
-    }
+      // AUTO GALLERY REFRESH
+      if (filePath.endsWith('.mp4')) {
+        await GallerySaver.saveVideo(savedFile.path);
+      } else {
+        await GallerySaver.saveImage(savedFile.path);
+      }
 
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Saved Successfully'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    }
-  } catch (e) {
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Save failed: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Saved Successfully'),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Save failed: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
-}
 
   Widget buildGrid(List<String> files) {
     if (files.isEmpty) {
@@ -254,63 +259,126 @@ class _StatusScreenState extends State<StatusScreen>
     }
 
     return GridView.builder(
-      padding: const EdgeInsets.all(8),
+      padding: const EdgeInsets.all(10),
       itemCount: files.length,
       gridDelegate:
           const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 8,
-        childAspectRatio: 0.62,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 0.68,
       ),
       itemBuilder: (context, index) {
         final path = files[index];
 
         bool isVideo = path.endsWith('.mp4');
 
-        return Card(
-          child: Column(
-            children: [
-              Expanded(
-                child: isVideo
-                    ? Stack(
-                        alignment: Alignment.center,
-                        children: [
-                          videoThumbnails[path] != null
-                              ? Image.file(
-                                  File(videoThumbnails[path]!),
-                                  fit: BoxFit.cover,
-                                  width: double.infinity,
-                                  height: double.infinity,
-                                )
-                              : const Center(
-                                  child:
-                                      CircularProgressIndicator(),
-                                ),
-                          const CircleAvatar(
-                            backgroundColor: Colors.black54,
-                            child: Icon(
-                              Icons.play_arrow,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ],
-                      )
-                    : Image.file(
-                        File(path),
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                      ),
-              ),
-              ElevatedButton.icon(
-                onPressed: () {
-                  saveStatus(path);
-                },
-                icon: const Icon(Icons.download),
-                label: const Text('Save'),
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(18),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.08),
+                blurRadius: 6,
+                offset: const Offset(0, 3),
               ),
             ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(18),
+            child: Column(
+              children: [
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => PreviewScreen(
+                            filePath: path,
+                            isVideo: isVideo,
+                          ),
+                        ),
+                      );
+                    },
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        Positioned.fill(
+                          child: isVideo
+                              ? (videoThumbnails[path] != null
+                                  ? Image.file(
+                                      File(
+                                        videoThumbnails[path]!,
+                                      ),
+                                      fit: BoxFit.cover,
+                                    )
+                                  : Container(
+                                      color: Colors.black12,
+                                      child: const Center(
+                                        child:
+                                            CircularProgressIndicator(),
+                                      ),
+                                    ))
+                              : Image.file(
+                                  File(path),
+                                  fit: BoxFit.cover,
+                                ),
+                        ),
+
+                        if (isVideo)
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              borderRadius:
+                                  BorderRadius.circular(50),
+                            ),
+                            padding: const EdgeInsets.all(10),
+                            child: const Icon(
+                              Icons.play_arrow,
+                              color: Colors.white,
+                              size: 38,
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
+
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 8,
+                  ),
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      saveStatus(path);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.green,
+                      foregroundColor: Colors.white,
+                      padding:
+                          const EdgeInsets.symmetric(
+                        vertical: 12,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius:
+                            BorderRadius.circular(12),
+                      ),
+                    ),
+                    icon: const Icon(Icons.download),
+                    label: const Text(
+                      'Save Status',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
         );
       },
@@ -323,7 +391,9 @@ class _StatusScreenState extends State<StatusScreen>
       appBar: AppBar(
         title: const Text(
           'WhatsApp Status Saver',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(
+            color: Colors.white,
+          ),
         ),
         centerTitle: true,
         backgroundColor: Colors.green,
@@ -355,9 +425,102 @@ class _StatusScreenState extends State<StatusScreen>
             ),
       bottomNavigationBar: adLoaded
           ? SizedBox(
-              height: bannerAd!.size.height.toDouble(),
-              width: bannerAd!.size.width.toDouble(),
+              height:
+                  bannerAd!.size.height.toDouble(),
+              width:
+                  bannerAd!.size.width.toDouble(),
               child: AdWidget(ad: bannerAd!),
+            )
+          : null,
+    );
+  }
+}
+
+class PreviewScreen extends StatefulWidget {
+  final String filePath;
+
+  final bool isVideo;
+
+  const PreviewScreen({
+    super.key,
+    required this.filePath,
+    required this.isVideo,
+  });
+
+  @override
+  State<PreviewScreen> createState() =>
+      _PreviewScreenState();
+}
+
+class _PreviewScreenState
+    extends State<PreviewScreen> {
+  VideoPlayerController? controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.isVideo) {
+      controller = VideoPlayerController.file(
+        File(widget.filePath),
+      )
+        ..initialize().then((_) {
+          setState(() {});
+          controller!.play();
+        });
+    }
+  }
+
+  @override
+  void dispose() {
+    controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+      ),
+      body: Center(
+        child: widget.isVideo
+            ? (controller != null &&
+                    controller!
+                        .value.isInitialized)
+                ? AspectRatio(
+                    aspectRatio:
+                        controller!
+                            .value.aspectRatio,
+                    child:
+                        VideoPlayer(controller!),
+                  )
+                : const CircularProgressIndicator()
+            : InteractiveViewer(
+                child: Image.file(
+                  File(widget.filePath),
+                ),
+              ),
+      ),
+      floatingActionButton: widget.isVideo
+          ? FloatingActionButton(
+              backgroundColor: Colors.green,
+              onPressed: () {
+                setState(() {
+                  if (controller!
+                      .value.isPlaying) {
+                    controller!.pause();
+                  } else {
+                    controller!.play();
+                  }
+                });
+              },
+              child: Icon(
+                controller!.value.isPlaying
+                    ? Icons.pause
+                    : Icons.play_arrow,
+              ),
             )
           : null,
     );
