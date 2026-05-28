@@ -1,5 +1,5 @@
 name: store_gui_app
-description: "Status Media Saver with AdMob"
+description: "WhatsApp Status Saver"
 publish_to: "none"
 
 version: 1.0.0+1
@@ -13,16 +13,15 @@ dependencies:
 
   cupertino_icons: ^1.0.8
 
-  # Device Info + Permissions
   device_info_plus: ^10.1.2
   permission_handler: ^12.0.1
   path_provider: ^2.1.5
 
-  # Google Ads
   google_mobile_ads: ^5.3.1
 
-  # Video Thumbnail Generator
   video_thumbnail_plus: ^0.0.2
+
+  saf: ^1.0.4
 
 dev_dependencies:
   flutter_test:
@@ -30,7 +29,6 @@ dev_dependencies:
 
   flutter_lints: ^3.0.2
 
-  # App Icon Generator
   flutter_launcher_icons: ^0.13.1
 
 flutter_launcher_icons:
