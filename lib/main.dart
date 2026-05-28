@@ -134,7 +134,7 @@ class _StatusScreenState extends State<StatusScreen> with SingleTickerProviderSt
     return results;
   }
 
-  Future<List<String>> _loadSafFiles(String safPathSegment) async {
+    Future<List<String>> _loadSafFiles(String safPathSegment) async {
     try {
       Saf safInstance = Saf(safPathSegment);
       bool? permissionGranted = await safInstance.getDirectoryPermission();
@@ -142,7 +142,9 @@ class _StatusScreenState extends State<StatusScreen> with SingleTickerProviderSt
       if (permissionGranted == true) {
         List<String>? cachedPaths = await safInstance.getFilesPath();
         if (cachedPaths != null) {
+          // Convert file schema elements directly to clean local strings
           return cachedPaths
+              .map((path) => Uri.parse(path).path)
               .where((path) =>
                   !path.contains(".nomedia") &&
                   (path.endsWith(".jpg") || path.endsWith(".jpeg") || path.endsWith(".png") || path.endsWith(".mp4")))
@@ -150,10 +152,11 @@ class _StatusScreenState extends State<StatusScreen> with SingleTickerProviderSt
         }
       }
     } catch (e) {
-      debugPrint("SAF extraction sequence fault: \$e");
+      debugPrint("SAF extraction sequence fault: $e");
     }
     return [];
   }
+
 
   Future<void> generateAllThumbnails(List<String> files) async {
     try {
@@ -179,34 +182,41 @@ class _StatusScreenState extends State<StatusScreen> with SingleTickerProviderSt
     }
   }
 
-  Future<void> saveStatus(String filePath) async {
+    Future<void> saveStatus(String filePath) async {
     try {
-      if (await Permission.storage.request().isGranted || await _getAndroidSDK() >= 30) {
-        if (filePath.endsWith(".mp4")) {
-          await Gal.putVideo(filePath);
-        } else {
-          await Gal.putImage(filePath);
-        }
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text("Saved directly into your device Gallery app!"),
-              backgroundColor: Colors.green,
-            ),
-          );
-        }
-      } else {
-        throw Exception("Storage access rejected by user.");
+      // Direct permission handling via gal package structure requirement
+      final hasAccess = await Gal.hasAccess();
+      if (!hasAccess) {
+        await Gal.requestAccess();
       }
-    } catch (e) {
+
+      if (filePath.endsWith(".mp4")) {
+        await Gal.putVideo(filePath);
+      } else {
+        await Gal.putImage(filePath);
+      }
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Gallery Save Failure: \$e"), backgroundColor: Colors.red),
+          const SnackBar(
+            content: Text("Saved directly into your device Gallery app!"),
+            backgroundColor: Colors.green,
+          ),
+        );
+      }
+    } catch (error) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            // FIXED: Removed the backslash so it displays the real system error message
+            content: Text("Gallery Save Failure: $error"), 
+            backgroundColor: Colors.red,
+          ),
         );
       }
     }
   }
+
 
   Widget buildGrid(List<String> files) {
     if (files.isEmpty) {
