@@ -6,6 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:saf/saf.dart';
 import 'package:video_thumbnail_plus/video_thumbnail_plus.dart';
+import 'package:gallery_saver_plus/gallery_saver.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -179,46 +180,64 @@ class _StatusScreenState extends State<StatusScreen>
     }
   }
 
-  Future<void> saveStatus(String path) async {
-    try {
-      final file = File(path);
+  Future<void> saveStatus(String filePath) async {
+  try {
+    final file = File(filePath);
 
-      if (!await file.exists()) {
-        return;
-      }
+    if (!await file.exists()) {
+      throw Exception('File not found');
+    }
 
-      Directory targetDir;
+    Directory targetDir;
 
-      if (path.endsWith('.mp4')) {
-        targetDir =
-            Directory('/storage/emulated/0/Movies/StatusSaver');
-      } else {
-        targetDir =
-            Directory('/storage/emulated/0/Pictures/StatusSaver');
-      }
+    if (filePath.endsWith('.mp4')) {
+      targetDir = Directory(
+        '/storage/emulated/0/Movies/StatusSaver',
+      );
+    } else {
+      targetDir = Directory(
+        '/storage/emulated/0/Pictures/StatusSaver',
+      );
+    }
 
-      if (!await targetDir.exists()) {
-        await targetDir.create(recursive: true);
-      }
+    if (!await targetDir.exists()) {
+      await targetDir.create(recursive: true);
+    }
 
-      final fileName =
-          DateTime.now().millisecondsSinceEpoch.toString() +
-              (path.endsWith('.mp4') ? '.mp4' : '.jpg');
+    final fileName =
+        DateTime.now().millisecondsSinceEpoch.toString() +
+            (filePath.endsWith('.mp4') ? '.mp4' : '.jpg');
 
-      await file.copy('${targetDir.path}/$fileName');
+    final savedPath = '${targetDir.path}/$fileName';
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Saved Successfully'),
-            backgroundColor: Colors.green,
-          ),
-        );
-      }
-    } catch (e) {
-      debugPrint(e.toString());
+    final savedFile = await file.copy(savedPath);
+
+    // AUTO REFRESH GALLERY
+    if (filePath.endsWith('.mp4')) {
+      await GallerySaver.saveVideo(savedFile.path);
+    } else {
+      await GallerySaver.saveImage(savedFile.path);
+    }
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Saved Successfully'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
+  } catch (e) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Save failed: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
+}
 
   Widget buildGrid(List<String> files) {
     if (files.isEmpty) {
