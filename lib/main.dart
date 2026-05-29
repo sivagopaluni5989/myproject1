@@ -27,6 +27,7 @@ class MyApp extends StatelessWidget {
       title: 'WhatsApp Status Saver',
       theme: ThemeData(
         primarySwatch: Colors.green,
+        scaffoldBackgroundColor: const Color(0xFFF5F5F5),
       ),
       home: const StatusScreen(),
     );
@@ -164,8 +165,8 @@ class _StatusScreenState extends State<StatusScreen>
               video: path,
               thumbnailPath: tempDir.path,
               imageFormat: ImageFormat.JPEG,
-              quality: 75,
-              maxWidth: 300,
+              quality: 80,
+              maxWidth: 400,
             );
 
             if (thumb != null) {
@@ -217,7 +218,6 @@ class _StatusScreenState extends State<StatusScreen>
 
       final savedFile = await file.copy(savedPath);
 
-      // AUTO GALLERY REFRESH
       if (filePath.endsWith('.mp4')) {
         await GallerySaver.saveVideo(savedFile.path);
       } else {
@@ -252,7 +252,10 @@ class _StatusScreenState extends State<StatusScreen>
           child: Text(
             'No statuses found.\n\nOpen WhatsApp and watch statuses first.',
             textAlign: TextAlign.center,
-            style: TextStyle(fontSize: 18),
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       );
@@ -264,9 +267,9 @@ class _StatusScreenState extends State<StatusScreen>
       gridDelegate:
           const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
-        childAspectRatio: 0.68,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 0.55,
       ),
       itemBuilder: (context, index) {
         final path = files[index];
@@ -276,17 +279,17 @@ class _StatusScreenState extends State<StatusScreen>
         return Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(22),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withOpacity(0.08),
-                blurRadius: 6,
-                offset: const Offset(0, 3),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
               ),
             ],
           ),
           child: ClipRRect(
-            borderRadius: BorderRadius.circular(18),
+            borderRadius: BorderRadius.circular(22),
             child: Column(
               children: [
                 Expanded(
@@ -334,11 +337,11 @@ class _StatusScreenState extends State<StatusScreen>
                               borderRadius:
                                   BorderRadius.circular(50),
                             ),
-                            padding: const EdgeInsets.all(10),
+                            padding: const EdgeInsets.all(14),
                             child: const Icon(
                               Icons.play_arrow,
                               color: Colors.white,
-                              size: 38,
+                              size: 42,
                             ),
                           ),
                       ],
@@ -346,33 +349,31 @@ class _StatusScreenState extends State<StatusScreen>
                   ),
                 ),
 
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 8,
-                    vertical: 8,
-                  ),
-                  child: ElevatedButton.icon(
-                    onPressed: () {
-                      saveStatus(path);
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.green,
-                      foregroundColor: Colors.white,
-                      padding:
-                          const EdgeInsets.symmetric(
-                        vertical: 12,
+                Padding(
+                  padding: const EdgeInsets.all(10),
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        saveStatus(path);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.green,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius:
+                              BorderRadius.circular(14),
+                        ),
                       ),
-                      shape: RoundedRectangleBorder(
-                        borderRadius:
-                            BorderRadius.circular(12),
-                      ),
-                    ),
-                    icon: const Icon(Icons.download),
-                    label: const Text(
-                      'Save Status',
-                      style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                      icon: const Icon(Icons.download),
+                      label: const Text(
+                        'Save Status',
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 17,
+                        ),
                       ),
                     ),
                   ),
@@ -389,17 +390,24 @@ class _StatusScreenState extends State<StatusScreen>
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        elevation: 0,
+        centerTitle: true,
+        backgroundColor: Colors.green,
         title: const Text(
           'WhatsApp Status Saver',
           style: TextStyle(
             color: Colors.white,
+            fontWeight: FontWeight.bold,
+            fontSize: 24,
+            letterSpacing: 0.5,
           ),
         ),
-        centerTitle: true,
-        backgroundColor: Colors.green,
         bottom: TabBar(
           controller: _tabController,
           labelColor: Colors.white,
+          unselectedLabelColor: Colors.white70,
+          indicatorColor: Colors.white,
+          indicatorWeight: 4,
           tabs: const [
             Tab(
               icon: Icon(Icons.chat),
@@ -414,7 +422,9 @@ class _StatusScreenState extends State<StatusScreen>
       ),
       body: isLoading
           ? const Center(
-              child: CircularProgressIndicator(),
+              child: CircularProgressIndicator(
+                color: Colors.green,
+              ),
             )
           : TabBarView(
               controller: _tabController,
@@ -496,10 +506,13 @@ class _PreviewScreenState
                     child:
                         VideoPlayer(controller!),
                   )
-                : const CircularProgressIndicator()
+                : const CircularProgressIndicator(
+                    color: Colors.green,
+                  )
             : InteractiveViewer(
                 child: Image.file(
                   File(widget.filePath),
+                  fit: BoxFit.contain,
                 ),
               ),
       ),
