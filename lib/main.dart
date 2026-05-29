@@ -267,9 +267,9 @@ class _StatusScreenState extends State<StatusScreen>
       gridDelegate:
           const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 12,
-        mainAxisSpacing: 12,
-        childAspectRatio: 0.55,
+        crossAxisSpacing: 10,
+        mainAxisSpacing: 10,
+        childAspectRatio: 0.78,
       ),
       itemBuilder: (context, index) {
         final path = files[index];
@@ -311,11 +311,13 @@ class _StatusScreenState extends State<StatusScreen>
                         Positioned.fill(
                           child: isVideo
                               ? (videoThumbnails[path] != null
-                                  ? Image.file(
-                                      File(
-                                        videoThumbnails[path]!,
+                                  ? SizedBox.expand(
+                                      child: Image.file(
+                                        File(
+                                          videoThumbnails[path]!,
+                                        ),
+                                        fit: BoxFit.cover,
                                       ),
-                                      fit: BoxFit.cover,
                                     )
                                   : Container(
                                       color: Colors.black12,
@@ -324,9 +326,11 @@ class _StatusScreenState extends State<StatusScreen>
                                             CircularProgressIndicator(),
                                       ),
                                     ))
-                              : Image.file(
-                                  File(path),
-                                  fit: BoxFit.cover,
+                              : SizedBox.expand(
+                                  child: Image.file(
+                                    File(path),
+                                    fit: BoxFit.cover,
+                                  ),
                                 ),
                         ),
 
