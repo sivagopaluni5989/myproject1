@@ -12,36 +12,31 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
-
   device_info_plus: ^10.1.2
   permission_handler: ^12.0.1
   path_provider: ^2.1.5
-
   google_mobile_ads: ^5.3.1
-
   video_thumbnail_plus: ^0.0.2
   video_player: ^2.9.2
-
   saf: ^1.0.4
-
   gallery_saver_plus: ^3.2.9
+
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
 
   flutter_lints: ^3.0.2
-
   flutter_launcher_icons: ^0.13.1
 
 flutter_launcher_icons:
   android: true
   ios: true
 
-  image_path: assets/icon/new_logo.png
+  image_path: "assets/icon/new_logo.png"
 
-  adaptive_icon_background: "#ffffff"
-  adaptive_icon_foreground: assets/icon/new_logo.png
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/icon/new_logo.png"
 
   remove_alpha_ios: true
 
