@@ -10,3 +10,35 @@ linux/flutter/ephemeral/
 windows/flutter/ephemeral/
 *.apk
 *.aab
+build/
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.pub-cache/
+.pub/
+ios/Flutter/ephemeral/
+macos/Flutter/ephemeral/
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/
+
+# Gradle
+android/.gradle/
+
+# Android local/signing files
+android/key.properties
+android/local.properties
+
+# Flutter generated files
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Flutter ephemeral files
+ios/Flutter/ephemeral/
+macos/Flutter/ephemeral/
+linux/flutter/ephemeral/
+windows/flutter/ephemeral/
+
+# Build artifacts
+build/
+*.aab
+*.apk
