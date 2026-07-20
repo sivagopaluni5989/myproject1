@@ -13,9 +13,9 @@ import 'ad_helper.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(const WAStatusSaverApp());
+  await MobileAds.instance.initialize();
 
-  MobileAds.instance.initialize();
+  runApp(const WAStatusSaverApp());
 }
 
 // ======================================================
