@@ -1,0 +1,156 @@
+Analyzing myproject1...                                         
+
+  error • The method 'StatusHomePage' isn't defined for the type '_HomeControllerState'. Try correcting the name to the name of an existing method, or defining a method named 'StatusHomePage' • lib/main.dart:203:10 • undefined_method
+  error • 'class' can't be used as an identifier because it's a keyword. Try renaming this to be an identifier that isn't a keyword • lib/main.dart:216:1 • expected_identifier_but_got_keyword
+  error • Expected a statement • lib/main.dart:216:1 • missing_statement
+  error • Expected to find ';' • lib/main.dart:216:1 • expected_token
+  error • Undefined name 'class'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:216:1 • undefined_identifier
+  error • Expected to find ';' • lib/main.dart:216:7 • expected_token
+  error • Undefined name 'AccessAuthorizationScreen'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:216:7 • undefined_identifier
+  error • 'extends' can't be used as an identifier because it's a keyword. Try renaming this to be an identifier that isn't a keyword • lib/main.dart:216:33 • expected_identifier_but_got_keyword
+  error • Expected a statement • lib/main.dart:216:33 • missing_statement
+  error • Expected to find ';' • lib/main.dart:216:33 • expected_token
+  error • Undefined name 'extends'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:216:33 • undefined_identifier
+  error • Expected to find ';' • lib/main.dart:216:41 • expected_token
+  error • The name 'AccessAuthorizationScreen' isn't a class. Try correcting the name to match an existing class • lib/main.dart:221:9 • creation_with_non_type
+  error • The getter 'key' isn't defined in a superclass of '_HomeControllerState'. Try correcting the name to the name of an existing getter, or defining a getter or field named 'key' in a superclass • lib/main.dart:222:11 • undefined_super_member
+   info • 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required. Try replacing the use of the deprecated member with the replacement • lib/main.dart:223:5 • deprecated_member_use
+  error • Expected to find ',' • lib/main.dart:223:14 • expected_token
+   info • 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required. Try replacing the use of the deprecated member with the replacement • lib/main.dart:224:5 • deprecated_member_use
+  error • Expected to find ',' • lib/main.dart:224:14 • expected_token
+   info • 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required. Try replacing the use of the deprecated member with the replacement • lib/main.dart:225:5 • deprecated_member_use
+  error • Expected to find ',' • lib/main.dart:225:14 • expected_token
+  error • The getter 'onPermissionGranted' isn't defined for the type '_HomeControllerState'. Try importing the library that defines 'onPermissionGranted', correcting the name to the name of an existing getter, or defining a getter or field named 'onPermissionGranted' • lib/main.dart:225:19 • undefined_getter
+  error • The final variable 'onPermissionGranted' can't be read because it's potentially unassigned at this point. Ensure that it is assigned on necessary execution paths • lib/main.dart:301:5 • read_potentially_unassigned_final
+warning • The annotation 'override' can only be used on fields, getters, methods, or setters • lib/main.dart:408:4 • invalid_annotation_target
+warning • The declaration 'build' isn't referenced. Try removing the declaration of 'build' • lib/main.dart:409:10 • unused_element
+  error • The final variable 'waInstalled' can't be read because it's potentially unassigned at this point. Ensure that it is assigned on necessary execution paths • lib/main.dart:478:19 • read_potentially_unassigned_final
+  error • The final variable 'wbInstalled' can't be read because it's potentially unassigned at this point. Ensure that it is assigned on necessary execution paths • lib/main.dart:486:5 • read_potentially_unassigned_final
+  error • The final variable 'waInstalled' can't be read because it's potentially unassigned at this point. Ensure that it is assigned on necessary execution paths • lib/main.dart:494:6 • read_potentially_unassigned_final
+  error • The final variable 'wbInstalled' can't be read because it's potentially unassigned at this point. Ensure that it is assigned on necessary execution paths • lib/main.dart:494:22 • read_potentially_unassigned_final
+  error • 'class' can't be used as an identifier because it's a keyword. Try renaming this to be an identifier that isn't a keyword • lib/main.dart:569:1 • expected_identifier_but_got_keyword
+  error • Expected a statement • lib/main.dart:569:1 • missing_statement
+  error • Expected to find ';' • lib/main.dart:569:1 • expected_token
+  error • Undefined name 'class'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:569:1 • undefined_identifier
+  error • Expected to find ';' • lib/main.dart:569:7 • expected_token
+  error • Undefined name 'StatusHomePage'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:569:7 • undefined_identifier
+  error • 'extends' can't be used as an identifier because it's a keyword. Try renaming this to be an identifier that isn't a keyword • lib/main.dart:569:22 • expected_identifier_but_got_keyword
+  error • Expected a statement • lib/main.dart:569:22 • missing_statement
+  error • Expected to find ';' • lib/main.dart:569:22 • expected_token
+  error • Undefined name 'extends'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:569:22 • undefined_identifier
+  error • Expected to find ';' • lib/main.dart:569:30 • expected_token
+warning • The value of the local variable 'whatsappAccess' isn't used. Try removing the variable or using it • lib/main.dart:570:14 • unused_local_variable
+warning • The value of the local variable 'businessAccess' isn't used. Try removing the variable or using it • lib/main.dart:572:14 • unused_local_variable
+  error • The name 'StatusHomePage' isn't a class. Try correcting the name to match an existing class • lib/main.dart:574:9 • creation_with_non_type
+  error • The getter 'key' isn't defined in a superclass of '_HomeControllerState'. Try correcting the name to the name of an existing getter, or defining a getter or field named 'key' in a superclass • lib/main.dart:575:11 • undefined_super_member
+   info • 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required. Try replacing the use of the deprecated member with the replacement • lib/main.dart:576:5 • deprecated_member_use
+  error • Expected to find ',' • lib/main.dart:576:14 • expected_token
+  error • The getter 'whatsappAccess' isn't defined for the type '_HomeControllerState'. Try importing the library that defines 'whatsappAccess', correcting the name to the name of an existing getter, or defining a getter or field named 'whatsappAccess' • lib/main.dart:576:19 • undefined_getter
+   info • 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required. Try replacing the use of the deprecated member with the replacement • lib/main.dart:577:5 • deprecated_member_use
+  error • Expected to find ',' • lib/main.dart:577:14 • expected_token
+  error • The getter 'businessAccess' isn't defined for the type '_HomeControllerState'. Try importing the library that defines 'businessAccess', correcting the name to the name of an existing getter, or defining a getter or field named 'businessAccess' • lib/main.dart:577:19 • undefined_getter
+warning • The annotation 'override' can only be used on fields, getters, methods, or setters • lib/main.dart:580:4 • invalid_annotation_target
+  error • The name 'StatusHomePage' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'StatusHomePage' • lib/main.dart:581:9 • non_type_as_type_argument
+warning • The declaration 'createState' isn't referenced. Try removing the declaration of 'createState' • lib/main.dart:581:25 • unused_element
+  error • The method '_StatusHomePageState' isn't defined for the type '_HomeControllerState'. Try correcting the name to the name of an existing method, or defining a method named '_StatusHomePageState' • lib/main.dart:581:42 • undefined_method
+  error • 'class' can't be used as an identifier because it's a keyword. Try renaming this to be an identifier that isn't a keyword • lib/main.dart:584:1 • expected_identifier_but_got_keyword
+  error • Expected a statement • lib/main.dart:584:1 • missing_statement
+  error • Expected to find ';' • lib/main.dart:584:1 • expected_token
+  error • Undefined name 'class'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:584:1 • undefined_identifier
+  error • Expected to find ';' • lib/main.dart:584:7 • expected_token
+  error • Undefined name '_StatusHomePageState'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:584:7 • undefined_identifier
+  error • 'extends' can't be used as an identifier because it's a keyword. Try renaming this to be an identifier that isn't a keyword • lib/main.dart:584:28 • expected_identifier_but_got_keyword
+  error • Expected a statement • lib/main.dart:584:28 • missing_statement
+  error • Expected to find ';' • lib/main.dart:584:28 • expected_token
+  error • Undefined name 'extends'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:584:28 • undefined_identifier
+  error • The operator '<' isn't defined for the type 'Type'. Try defining the operator '<' • lib/main.dart:584:41 • undefined_operator
+  error • Undefined name 'StatusHomePage'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:584:42 • undefined_identifier
+  error • A comparison expression can't be an operand of another comparison expression. Try putting parentheses around one of the comparisons • lib/main.dart:584:56 • equality_cannot_be_equality_operand
+  error • 'with' can't be used as an identifier because it's a keyword. Try renaming this to be an identifier that isn't a keyword • lib/main.dart:585:5 • expected_identifier_but_got_keyword
+  error • Expected to find ';' • lib/main.dart:585:5 • expected_token
+  error • Undefined name 'with'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:585:5 • undefined_identifier
+  error • Expected to find ';' • lib/main.dart:585:10 • expected_token
+  error • Can't have modifier 'static' here. Try removing 'static' • lib/main.dart:589:4 • extraneous_modifier
+warning • The annotation 'override' can only be used on fields, getters, methods, or setters • lib/main.dart:625:4 • invalid_annotation_target
+warning • The declaration 'initState' isn't referenced. Try removing the declaration of 'initState' • lib/main.dart:626:8 • unused_element
+  error • The argument type '_HomeControllerState' can't be assigned to the parameter type 'TickerProvider'.  • lib/main.dart:631:14 • argument_type_not_assignable
+  error • Local variable 'initializeAds' can't be referenced before it is declared. Try moving the declaration to before the first use, or renaming the local variable so that it doesn't hide a name from an enclosing scope • lib/main.dart:634:5 • referenced_before_declaration
+  error • Local variable 'requestPermissions' can't be referenced before it is declared. Try moving the declaration to before the first use, or renaming the local variable so that it doesn't hide a name from an enclosing scope • lib/main.dart:636:5 • referenced_before_declaration
+  error • Local variable 'loadStatuses' can't be referenced before it is declared. Try moving the declaration to before the first use, or renaming the local variable so that it doesn't hide a name from an enclosing scope • lib/main.dart:638:5 • referenced_before_declaration
+warning • The annotation 'override' can only be used on fields, getters, methods, or setters • lib/main.dart:641:4 • invalid_annotation_target
+warning • The declaration 'dispose' isn't referenced. Try removing the declaration of 'dispose' • lib/main.dart:642:8 • unused_element
+  error • Local variable 'loadStatuses' can't be referenced before it is declared. Try moving the declaration to before the first use, or renaming the local variable so that it doesn't hide a name from an enclosing scope • lib/main.dart:667:9 • referenced_before_declaration
+warning • The value of the local variable 'get' isn't used. Try removing the variable or using it • lib/main.dart:713:20 • unused_local_variable
+  error • Expected to find ';' • lib/main.dart:713:20 • expected_token
+  error • Expected to find ';' • lib/main.dart:713:24 • expected_token
+  error • Undefined name 'currentImages'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:713:24 • undefined_identifier
+  error • A value of type 'List<StatusFile>' can't be returned from the method 'build' because it has a return type of 'Widget' • lib/main.dart:714:12 • return_of_invalid_type
+warning • Dead code. Try removing the code, or fixing the code before it so that it can be reached • lib/main.dart:714:33 • dead_code
+warning • Dead code. Try removing the code, or fixing the code before it so that it can be reached • lib/main.dart:721:3 • dead_code
+warning • The value of the local variable 'get' isn't used. Try removing the variable or using it • lib/main.dart:721:20 • unused_local_variable
+  error • Expected to find ';' • lib/main.dart:721:20 • expected_token
+  error • The name 'get' is already defined. Try renaming one of the declarations • lib/main.dart:721:20 • duplicate_definition
+  error • Expected to find ';' • lib/main.dart:721:24 • expected_token
+  error • Undefined name 'currentVideos'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:721:24 • undefined_identifier
+  error • A value of type 'List<StatusFile>' can't be returned from the method 'build' because it has a return type of 'Widget' • lib/main.dart:722:12 • return_of_invalid_type
+  error • Local variable 'loadFromTree' can't be referenced before it is declared. Try moving the declaration to before the first use, or renaming the local variable so that it doesn't hide a name from an enclosing scope • lib/main.dart:755:27 • referenced_before_declaration
+  error • Local variable 'loadFromTree' can't be referenced before it is declared. Try moving the declaration to before the first use, or renaming the local variable so that it doesn't hide a name from an enclosing scope • lib/main.dart:769:27 • referenced_before_declaration
+  error • Local variable 'generateVideoThumbnails' can't be referenced before it is declared. Try moving the declaration to before the first use, or renaming the local variable so that it doesn't hide a name from an enclosing scope • lib/main.dart:779:11 • referenced_before_declaration
+warning • The declaration 'clearTemporaryStatusCache' isn't referenced. Try removing the declaration of 'clearTemporaryStatusCache' • lib/main.dart:796:16 • unused_element
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check. Guard a 'State.context' use with a 'mounted' check on the State, and other BuildContext use with a 'mounted' check on the BuildContext • lib/main.dart:881:28 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check. Guard a 'State.context' use with a 'mounted' check on the State, and other BuildContext use with a 'mounted' check on the BuildContext • lib/main.dart:890:28 • use_build_context_synchronously
+warning • The annotation 'override' can only be used on fields, getters, methods, or setters • lib/main.dart:946:4 • invalid_annotation_target
+warning • The declaration 'build' isn't referenced. Try removing the declaration of 'build' • lib/main.dart:947:10 • unused_element
+  error • Local variable 'buildStatusGrid' can't be referenced before it is declared. Try moving the declaration to before the first use, or renaming the local variable so that it doesn't hide a name from an enclosing scope • lib/main.dart:1098:23 • referenced_before_declaration
+  error • Undefined name 'currentImages'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:1099:25 • undefined_identifier
+  error • Local variable 'buildStatusGrid' can't be referenced before it is declared. Try moving the declaration to before the first use, or renaming the local variable so that it doesn't hide a name from an enclosing scope • lib/main.dart:1103:23 • referenced_before_declaration
+  error • Undefined name 'currentVideos'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:1104:25 • undefined_identifier
+  error • Local variable 'buildSavedPage' can't be referenced before it is declared. Try moving the declaration to before the first use, or renaming the local variable so that it doesn't hide a name from an enclosing scope • lib/main.dart:1108:23 • referenced_before_declaration
+  error • The method 'PreviewScreen' isn't defined for the type '_HomeControllerState'. Try correcting the name to the name of an existing method, or defining a method named 'PreviewScreen' • lib/main.dart:1195:33 • undefined_method
+  error • Local variable 'saveStatus' can't be referenced before it is declared. Try moving the declaration to before the first use, or renaming the local variable so that it doesn't hide a name from an enclosing scope • lib/main.dart:1281:25 • referenced_before_declaration
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check. Guard a 'State.context' use with a 'mounted' check on the State, and other BuildContext use with a 'mounted' check on the BuildContext • lib/main.dart:1365:22 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check. Guard a 'State.context' use with a 'mounted' check on the State, and other BuildContext use with a 'mounted' check on the BuildContext • lib/main.dart:1375:26 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check. Guard a 'State.context' use with a 'mounted' check on the State, and other BuildContext use with a 'mounted' check on the BuildContext • lib/main.dart:1390:26 • use_build_context_synchronously
+  error • The method 'PreviewScreen' isn't defined for the type '_HomeControllerState'. Try correcting the name to the name of an existing method, or defining a method named 'PreviewScreen' • lib/main.dart:1532:37 • undefined_method
+  error • 'class' can't be used as an identifier because it's a keyword. Try renaming this to be an identifier that isn't a keyword • lib/main.dart:1632:1 • expected_identifier_but_got_keyword
+  error • Expected a statement • lib/main.dart:1632:1 • missing_statement
+  error • Expected to find ';' • lib/main.dart:1632:1 • expected_token
+  error • Undefined name 'class'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:1632:1 • undefined_identifier
+  error • Expected to find ';' • lib/main.dart:1632:7 • expected_token
+  error • Undefined name 'PreviewScreen'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:1632:7 • undefined_identifier
+  error • 'extends' can't be used as an identifier because it's a keyword. Try renaming this to be an identifier that isn't a keyword • lib/main.dart:1632:21 • expected_identifier_but_got_keyword
+  error • Expected a statement • lib/main.dart:1632:21 • missing_statement
+  error • Expected to find ';' • lib/main.dart:1632:21 • expected_token
+  error • Undefined name 'extends'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:1632:21 • undefined_identifier
+  error • Expected to find ';' • lib/main.dart:1632:29 • expected_token
+warning • The value of the local variable 'status' isn't used. Try removing the variable or using it • lib/main.dart:1633:20 • unused_local_variable
+  error • The name 'PreviewScreen' isn't a class. Try correcting the name to match an existing class • lib/main.dart:1635:9 • creation_with_non_type
+  error • The getter 'key' isn't defined in a superclass of '_HomeControllerState'. Try correcting the name to the name of an existing getter, or defining a getter or field named 'key' in a superclass • lib/main.dart:1636:11 • undefined_super_member
+   info • 'required' is deprecated and shouldn't be used. In Dart 2.12 and later, use the built-in `required` keyword to mark a named parameter as required. Try replacing the use of the deprecated member with the replacement • lib/main.dart:1637:5 • deprecated_member_use
+  error • Expected to find ',' • lib/main.dart:1637:14 • expected_token
+  error • The getter 'status' isn't defined for the type '_HomeControllerState'. Try importing the library that defines 'status', correcting the name to the name of an existing getter, or defining a getter or field named 'status' • lib/main.dart:1637:19 • undefined_getter
+warning • The annotation 'override' can only be used on fields, getters, methods, or setters • lib/main.dart:1640:4 • invalid_annotation_target
+  error • The name 'PreviewScreen' isn't a type, so it can't be used as a type argument. Try correcting the name to an existing type, or defining a type named 'PreviewScreen' • lib/main.dart:1641:9 • non_type_as_type_argument
+warning • The declaration 'createState' isn't referenced. Try removing the declaration of 'createState' • lib/main.dart:1641:24 • unused_element
+  error • The method '_PreviewScreenState' isn't defined for the type '_HomeControllerState'. Try correcting the name to the name of an existing method, or defining a method named '_PreviewScreenState' • lib/main.dart:1641:41 • undefined_method
+  error • 'class' can't be used as an identifier because it's a keyword. Try renaming this to be an identifier that isn't a keyword • lib/main.dart:1644:1 • expected_identifier_but_got_keyword
+  error • Expected a statement • lib/main.dart:1644:1 • missing_statement
+  error • Expected to find ';' • lib/main.dart:1644:1 • expected_token
+  error • Undefined name 'class'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:1644:1 • undefined_identifier
+  error • Expected to find ';' • lib/main.dart:1644:7 • expected_token
+  error • Undefined name '_PreviewScreenState'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:1644:7 • undefined_identifier
+  error • 'extends' can't be used as an identifier because it's a keyword. Try renaming this to be an identifier that isn't a keyword • lib/main.dart:1644:27 • expected_identifier_but_got_keyword
+  error • Expected a statement • lib/main.dart:1644:27 • missing_statement
+  error • Expected to find ';' • lib/main.dart:1644:27 • expected_token
+  error • Undefined name 'extends'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:1644:27 • undefined_identifier
+  error • The operator '<' isn't defined for the type 'Type'. Try defining the operator '<' • lib/main.dart:1644:40 • undefined_operator
+  error • Undefined name 'PreviewScreen'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:1644:41 • undefined_identifier
+  error • A comparison expression can't be an operand of another comparison expression. Try putting parentheses around one of the comparisons • lib/main.dart:1644:54 • equality_cannot_be_equality_operand
+  error • Conditions must have a static type of 'bool'. Try changing the condition • lib/main.dart:1645:3 • non_bool_condition
+  error • Undefined name 'controller'. Try correcting the name to one that is defined, or defining the name • lib/main.dart:1645:26 • undefined_identifier
+  error • Expected an identifier • lib/main.dart:1645:36 • missing_identifier
+  error • Expected to find ':' • lib/main.dart:1645:36 • expected_token
+  error • Expected to find '}' • lib/main.dart:1645:36 • expected_token
+  error • Expected to find ';' • lib/main.dart:1778:1 • expected_token
+  error • Expected to find '}' • lib/main.dart:1779:1 • expected_token
+
